@@ -3,15 +3,34 @@ library(dplyr)
 
 CauseOfDeath = read.csv("DataBases/NCHS_-_Leading_Causes_of_Death__United_States.csv")
 
-HealthHabits = read.csv(
-  "DataBases/Nutrition__Physical_Activity__and_Obesity_-_Behavioral_Risk_Factor_Surveillance_System.csv"
-)
+
+
+
 
 #Delete columns that won't be useful for analysis
 
-CauseOfDeath = CauseOfDeath %>% select(., -X113.Cause.Name)
+CauseOfDeath = CauseOfDeath %>% 
+  select(., -X113.Cause.Name, Cause = Cause.Name, Rate = Age.adjusted.Death.Rate) %>%
+  filter(., !(Cause %in% c("All causes", "Unintentional injuries", "Influenza and pneumonia", 
+                           "CLRD", "Suicide", "Cancer")))
 head(CauseOfDeath)
 
+
+#Cite sources to justify the Cause of Death seleciton:
+
+# Western diet my affect Alzheimers https://www.tandfonline.com/doi/full/10.1080/07315724.2016.1161566
+
+# Lifestyle factors and stroke risk: Exercise, alcohol, diet, obesity, smoking, drug use, and stress
+#https://link.springer.com/article/10.1007/s11883-000-0111-3
+
+#https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6513610/
+#Obesity increases the risk of developing diabetes and hypertension, which are the two leading causes of CKD. 
+
+
+
+HealthHabits = read.csv(
+  "DataBases/Nutrition__Physical_Activity__and_Obesity_-_Behavioral_Risk_Factor_Surveillance_System.csv"
+)
 
 #Check if data values and alt are redundant
 DataValues = HealthHabits %>%
@@ -56,10 +75,10 @@ HealthHabits = HealthHabits %>%
       Data_Value_Footnote,
       Data_Value_Type
     ),
-    Year = YearStart
+    Year = YearStart,
+    State = LocationDesc
   )
 
-head(HealthHabits)
 
 #Summarize questions 
 
@@ -88,3 +107,11 @@ write.csv(HealthHabits, "DataBases/HealthHabits.csv")
 
 write.csv(CauseOfDeath, "DataBases/CauseOfDeath.csv")
 
+
+JoinDF = inner_join(HealthHabits, CauseOfDeath, by = c( "State" , "Year"))
+head(JoinDF)
+
+JoinDF = JoinDF %>%
+  filter(., !is.na(Data_Value))
+
+write.csv(JoinDF, "DataBases/JoinDF.csv")
