@@ -5,6 +5,7 @@ CauseOfDeath = read.csv("DataBases/NCHS_-_Leading_Causes_of_Death__United_States
 
 
 
+#Rates are adjusted per 100,000 population
 
 
 #Delete columns that won't be useful for analysis
@@ -32,6 +33,8 @@ HealthHabits = read.csv(
   "DataBases/Nutrition__Physical_Activity__and_Obesity_-_Behavioral_Risk_Factor_Surveillance_System.csv"
 )
 
+
+#Data_Value is a percentage!
 #Check if data values and alt are redundant
 DataValues = HealthHabits %>%
   filter(., !is.na(Data_Value)) %>%
@@ -73,7 +76,11 @@ HealthHabits = HealthHabits %>%
       StratificationCategoryId1,
       StratificationID1,
       Data_Value_Footnote,
-      Data_Value_Type
+      Data_Value_Type,
+      Low_Confidence_Limit,
+      High_Confidence_Limit,
+      Total,
+      Sample_Size
     ),
     Year = YearStart,
     State = LocationDesc
@@ -96,9 +103,9 @@ HealthHabits = HealthHabits %>%
     Question == "Percent of adults who engage in muscle-strengthening activities on 2 or more days a week"
     ~"Light physical activity",
     Question == "Percent of adults who report consuming fruit less than one time daily"
-    ~ "Low fruit consumtion",
+    ~ "Low fruit consumption",
     Question == "Percent of adults who report consuming vegetables less than one time daily" 
-    ~"Low vegetable consumtion"
+    ~"Low vegetable consumption"
     ))
 
 #Write Data Bases
@@ -112,6 +119,10 @@ JoinDF = inner_join(HealthHabits, CauseOfDeath, by = c( "State" , "Year"))
 head(JoinDF)
 
 JoinDF = JoinDF %>%
-  filter(., !is.na(Data_Value))
+  filter(., !is.na(Data_Value)) %>% 
+  select(., Year, State, Class, Percentage = Data_Value, Education, Income, Gender, 
+         Race.Ethnicity, GeoLocation, Behavior = Question , Stratification = Stratification1, 
+         StratificationCategory = StratificationCategory1, Age = Age.years., CauseDeath = Cause,
+         Rate)
 
 write.csv(JoinDF, "DataBases/JoinDF.csv")
