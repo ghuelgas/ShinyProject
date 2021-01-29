@@ -11,9 +11,10 @@ library(forcats)
 JoinDF = read.csv("./DataBases/JoinDF.csv", stringsAsFactors = FALSE)
 JoinDF = JoinDF %>% filter(., !is.na(Behavior))
 
-# convert matrix to dataframe
-state_stat <- data.frame(state.name = rownames(state.x77), state.x77)
-# remove row names
-rownames(state_stat) <- NULL
-# create variable with colnames as choice
-choice <- colnames(state_stat)[-1]
+BehaviorCol = c("Light physical activity" = "lightblue4", "Low fruit consumption" = "salmon3","Low vegetable consumption" = "burlywood2",
+                "Moderate physical activity" = "lightblue3", "No physical activity" = "salmon1","Obesity" = "salmon4","Overweight" = "azure2",
+                "Vigorous physical activity" = "lightblue2" )
+
+
+CofDeathCol = c("Alzheimer's disease" = "skyblue4", "Diabetes" = "paleturquoise" , "Heart disease" = "bisque2", "Kidney disease" = "gray20",
+                "Stroke" = "peru")

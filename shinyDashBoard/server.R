@@ -15,8 +15,9 @@ shinyServer(function(input, output){
                      options=list(region="US", 
                                   displayMode="regions", 
                                   resolution="provinces",
-                                  width="auto", height="auto"))
-        
+                                  width="auto", height="auto",
+                                  colorAxis = "{colors:['#E9D6C5', '#593E1A']}")
+        )
     })
     
     # show correlation graph in MAP
@@ -100,7 +101,7 @@ shinyServer(function(input, output){
         
     # show data using DataTable
     output$table <- DT::renderDataTable({
-        datatable(state_stat, rownames=FALSE) %>% 
+        datatable(JoinDF, rownames=FALSE) %>% 
             formatStyle(input$selected, background="skyblue", fontWeight='bold')
     })
     
