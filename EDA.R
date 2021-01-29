@@ -2,7 +2,10 @@ library(tidyverse)
 library(dplyr)
 library(dlookr)
 library(ggplot2)
-
+library(googleVis)
+library(leaflet)
+library(maps)
+library(tidyr)
 
 JoinDF = read.csv("./DataBases/JoinDF.csv", stringsAsFactors = FALSE)
 
@@ -19,7 +22,7 @@ CofDeathCol = c("Alzheimer's disease" = "lightgoldenrod1", "Diabetes" = "darksea
 
 #Selected for MAIN
 
-CauseQuestCorr = JoinDF %>%
+CauseBehaCor = JoinDF %>%
   select(., State, CauseDeath, Behavior, Percentage, Rate) %>%
   filter(., !is.na(Rate), !is.na(Percentage),!is.na(Behavior), !is.na(CauseDeath)) %>%
   group_by(., CauseDeath, Behavior, State) %>%
@@ -29,7 +32,7 @@ CauseQuestCorr = JoinDF %>%
   arrange(., desc(Corr))
 
 
-CauseQuestCorrPlot = CauseQuestCorr %>%
+CauseBehaCorPlot = CauseBehaCor %>%
   mutate(Behavior = fct_reorder(Behavior, Corr))%>%
   ggplot(aes())+
   geom_col(aes(x= CauseDeath, y = Corr, fill = Behavior  ), position = "dodge") +
@@ -40,7 +43,7 @@ CauseQuestCorrPlot = CauseQuestCorr %>%
        y = "Correlation") +
   theme_light()
 
-CauseQuestCorrPlot
+CauseBehaCorPlot
 
 
 
@@ -48,7 +51,7 @@ CauseQuestCorrPlot
 # Selected on BY STATE
 
 CauseOfDeathPlot2 = JoinDF %>%
-  filter(., State == "Minnesota")%>%
+  filter(., State == "Minnesota", Year == "2017")%>%
   mutate(CauseDeath = fct_reorder(CauseDeath, desc(Rate)))%>%
   ggplot(aes( fill = CauseDeath)) +
   geom_bar( aes( x = CauseDeath, y = Rate), stat = "Identity", position = "dodge") +
@@ -76,7 +79,31 @@ CauseOfDeathPlot3 = JoinDF %>%
   theme_light() 
 CauseOfDeathPlot3
 
+CauseOfDeathPlot4 = JoinDF %>% 
+  group_by(., Behavior , State, Year) %>%
+  filter(., State == "Minnesota") %>%
+  summarise(., AvgPercent = mean(Percentage)) %>%
+  ggplot(aes(group = Behavior) )+
+  geom_line(aes( x = Year, y = AvgPercent, color = Behavior), size = 1 ) +
+  scale_color_manual(values = BehaviorCol)  +
+  labs(x = "Year",
+       y = "Population %") +
+  theme_light() 
+CauseOfDeathPlot4
 
+CauseOfDeathPlot5 = JoinDF %>%
+  filter(., State == "Minnesota", Year == "2017")%>%
+  mutate(Behavior = fct_reorder(Behavior, desc(Percentage)))%>%
+  ggplot(aes( fill = Behavior)) +
+  geom_bar( aes( x = Behavior, y = Percentage), stat = "Identity", position = "dodge") +
+  theme_light()+
+  theme( legend.position = "none") +
+  scale_fill_manual(values = BehaviorCol) +
+  scale_x_discrete(guide = guide_axis(angle = 45))+
+  labs(x = "Behavior/Risk factor",
+       y = "Population %")
+
+CauseOfDeathPlot5
 
 
 #Selected for BEHAVIOR STRATIFICATION
@@ -97,3 +124,27 @@ StratCategory = JoinDF %>%
 StratCategory
 
 
+mapDF = JoinDF %>% group_by (., State, Behavior) %>% 
+  filter(., !is.na(Behavior) ) %>%
+  summarize(.,`Population Percentage`= mean(Percentage))
+
+
+mapDF$`Population Percentage`[(mapDF$Behavior == "Obesity")]
+
+
+G1 = gvisGeoChart(JoinDF, "State", "Percentage", 
+                  options=list(region="US", 
+                               displayMode="regions", 
+                               resolution="provinces",
+                               width="auto", height="auto"))
+
+G1
+
+
+
+mapDF = JoinDF %>% group_by (., State, Behavior) %>% 
+  filter(., !is.na(Behavior) ) %>%
+  summarize(., PopulationPercentage = mean(Percentage)) %>%
+  pivot_wider(., names_from = Behavior, values_from = PopulationPercentage)
+
+cat(mapDF$Behavior)

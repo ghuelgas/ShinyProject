@@ -1,33 +1,52 @@
 
 
 shinyUI(dashboardPage(
+    
     dashboardHeader(title = "Heath effects of our behaviors"),
+    
     dashboardSidebar(
-        
-        sidebarUserPanel(image = "https://yt3.ggpht.com/-04uuTMHfDz4/AAAAAAAAAAI/AAAAAAAAAAA/Kjeupp-eNNg/s100-c-k-no-rj-c0xffffff/photo.jpg"),
+        sidebarUserPanel( name = "Menu", image = ""),
         sidebarMenu(
             menuItem("Map", tabName = "map", icon = icon("map")),
             menuItem("State", tabName = "state", icon = icon("map-pin")),
             menuItem("Behavior", tabName = "behavior", icon = icon("running")),
             menuItem("Data", tabName = "data", icon = icon("database"))
-        ),
-        selectizeInput("selected",
-                       "Select Item to Display",
-                       choice)
+        )
     ),
+    
     dashboardBody(
         tags$head(
             tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
         ),
         tabItems(
             tabItem(tabName = "map",
-                    fluidRow(infoBoxOutput("maxBox"),
-                             infoBoxOutput("minBox"),
-                             infoBoxOutput("avgBox")),
-                    fluidRow(box(htmlOutput("map"), height = 300),
-                             box(htmlOutput("hist"), height = 300))),
+                    fluidRow(box(plotOutput("CauseBehaCor_plot"), width =  600),
+                             box(selectizeInput(inputId = "selectedBehavior",
+                                                label = "Select Behavior/Risk factor",
+                                                choices = colnames(mapDF)[-1]
+                                            )),
+                             box(htmlOutput("map"), height = 300)
+                             )
+                    ),
+            tabItem(tabName = "state",
+                    fluidRow(box(selectizeInput(inputId = "selectedState",
+                                                label = "Select State",
+                                                choices = unique(JoinDF$State)))),
+                             box(plotOutput("CauseDeath_plot")),
+                             box(plotOutput("DeathOverTime_plot"))
+                    ),
+            tabItem(tabName = "behavior",
+                    fluidRow(box(selectizeInput(inputId = "selectedState2",
+                                                label = "Select State",
+                                                choices = unique(JoinDF$State))),
+                             box(selectizeInput(inputId = "StratificationCategory",
+                                                label = "Select Stratification Category",
+                                                choices = unique(JoinDF$StratificationCategory))),
+                             box(plotOutput("BehaviorStrat_plot"), height = 300, width = 600))
+                    ),
             tabItem(tabName = "data",
                     fluidRow(box(DT::dataTableOutput("table"), width = 12)))
         )
     )
-))
+)
+)
