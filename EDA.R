@@ -148,3 +148,9 @@ mapDF = JoinDF %>% group_by (., State, Behavior) %>%
   pivot_wider(., names_from = Behavior, values_from = PopulationPercentage)
 
 cat(mapDF$Behavior)
+
+
+
+
+
+

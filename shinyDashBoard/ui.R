@@ -5,12 +5,14 @@ shinyUI(dashboardPage(
     dashboardHeader(title = "Health and behavior", titleWidth = 300),
     
     dashboardSidebar(
-        sidebarUserPanel( name = "Menu", image = icon("heartbeat")),
+        sidebarUserPanel( name = "MENU", img(src="healthy.jpg", height =45 )),
         sidebarMenu(
             menuItem("Map", tabName = "map", icon = icon("map")),
             menuItem("State", tabName = "state", icon = icon("map-pin")),
             menuItem("Behavior", tabName = "behavior", icon = icon("running")),
-            menuItem("Data", tabName = "data", icon = icon("database"))
+            menuItem("Data", tabName = "data", icon = icon("database")),
+            menuItem("Sources", tabName = "sources", icon = icon("book")),
+            menuItem("About me", tabName = "aboutme", icon = icon("user-circle"))
         )
     ),
     
@@ -21,7 +23,8 @@ shinyUI(dashboardPage(
         tabItems(
             tabItem(tabName = "map",
                     fluidRow(box( title= "Heath effects of our behaviors", status = "primary", solidHeader = TRUE,
-                                  "The relationship between the Cause of Death Rates and the incidence of particular behaviors/risk factors in the USA population is represented by a correlation coefficient. A strong nevative linear relation will have a correlation coeffitient close to -1, whereas a strong positive one will be close to 1.",
+                                  p("The relationship between the Cause of Death Rates and the incidence of particular behaviors/risk factors in the USA population is represented here by a correlation coefficient. A strong nevative linear relation will have
+                                    a correlation coeffitient close to -1, whereas a strong positive one will be close to 1."),
                                   plotOutput("CauseBehaCor_plot"), width =  12),
                              box(background = "navy", selectizeInput(inputId = "selectedBehavior",
                                                 label = "Select Behavior/Risk factor",
@@ -52,10 +55,20 @@ shinyUI(dashboardPage(
                     fluidRow(box(DT::dataTableOutput("table"), width = 12))),
         
             tabItem(tabName = "sources",
-                fluidRow(box("Centers for Disease Control and Prevention",
-                             "https://chronicdata.cdc.gov/Nutrition-Physical-Activity-and-Obesity/Nutrition-Physical-Activity-and-Obesity-Behavioral/hn4x-zwk7",
-                             "https://data.cdc.gov/NCHS/NCHS-Leading-Causes-of-Death-United-States/bi63-dtpu"))
-                )
-)
-)
-))
+                    fluidRow(box(p(h4("Centers for Disease Control and Prevention")),
+                             p("https://chronicdata.cdc.gov/Nutrition-Physical-Activity-and-Obesity/Nutrition-Physical-Activity-and-Obesity-Behavioral/hn4x-zwk7"),
+                             p("https://data.cdc.gov/NCHS/NCHS-Leading-Causes-of-Death-United-States/bi63-dtpu"), width = 12))
+                    ),
+            tabItem(tabName = "aboutme",
+                    fluidRow(box(img(src="GHM.jpeg", height="20%", width="20%"),
+                                 p(h4("Gabriela Huelgas Morales, PhD")),
+                                 br(),
+                                 p("GitHub : https://github.com/ghuelgas"),
+                                 br(),
+                                 p("LinkedIn: https://www.linkedin.com/in/gabriela-huelgas-morales-0896b8b3/?locale=en_US"),
+                                 br(),
+                                 p("GoogleScholar : https://scholar.google.com/citations?user=SG6xGIYAAAAJ&hl=en "), width = 12))
+            )
+                    )
+            )
+        ))
