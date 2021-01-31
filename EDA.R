@@ -3,7 +3,6 @@ library(dplyr)
 library(dlookr)
 library(ggplot2)
 library(googleVis)
-library(leaflet)
 library(maps)
 library(tidyr)
 
@@ -48,7 +47,7 @@ CauseBehaCorPlot
 
 
 
-# Selected on BY STATE
+# Selected on BY STATE -> Cause of death tab
 
 CauseOfDeathPlot2 = JoinDF %>%
   filter(., State == "Minnesota", Year == "2017")%>%
@@ -64,7 +63,7 @@ CauseOfDeathPlot2 = JoinDF %>%
   
 CauseOfDeathPlot2
 
-#selected on BY STATE
+# Selected on BY STATE -> Cause of death tab, over time
 
 CauseOfDeathPlot3 = JoinDF %>% 
   group_by(., CauseDeath , State, Year) %>%
@@ -78,6 +77,9 @@ CauseOfDeathPlot3 = JoinDF %>%
        y = "Death rate") +
   theme_light() 
 CauseOfDeathPlot3
+
+
+# Selected on BY STATE -> Behavior tab, over time
 
 CauseOfDeathPlot4 = JoinDF %>% 
   group_by(., Behavior , State, Year) %>%
@@ -147,10 +149,19 @@ mapDF = JoinDF %>% group_by (., State, Behavior) %>%
   summarize(., PopulationPercentage = mean(Percentage)) %>%
   pivot_wider(., names_from = Behavior, values_from = PopulationPercentage)
 
-cat(mapDF$Behavior)
 
 
 
 
+CauseOfDeath %>%
+  select(., Cause.Name, Age.adjusted.Death.Rate, Year) %>%
+  filter(., !is.na(Age.adjusted.Death.Rate), !is.na(Cause.Name), !(Cause.Name =="All causes"), Year %in% c("2011", "2012","2013","2014","2015","2016","2017")) %>%
+  group_by(., Cause.Name) %>%
+  summarise(., AvgTotalRate = mean(Age.adjusted.Death.Rate)) %>%
+  arrange(., desc(AvgTotalRate))
+ 
+
+unique(JoinDF$Education)
 
 
+CauseBeha_splot

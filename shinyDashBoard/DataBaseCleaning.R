@@ -107,7 +107,7 @@ HealthHabits = HealthHabits %>%
     ~ "Low fruit consumption",
     Question == "Percent of adults who report consuming vegetables less than one time daily" 
     ~"Low vegetable consumption"
-    ))
+    ), Income = case_when( Income == "Less than $15,000" ~ "$15,000 or less"))
 
 #Write Data Bases
 
@@ -120,10 +120,11 @@ JoinDF = inner_join(HealthHabits, CauseOfDeath, by = c( "State" , "Year"))
 head(JoinDF)
 
 JoinDF = JoinDF %>%
-  filter(., !is.na(Data_Value)) %>% 
   select(., Year, State, Class, Percentage = Data_Value, Education, Income, Gender, 
-         Race.Ethnicity, GeoLocation, Behavior = Question , Stratification = Stratification1, 
+         Race.Ethnicity, Behavior = Question , Stratification = Stratification1, 
          StratificationCategory = StratificationCategory1, Age = Age.years., CauseDeath = Cause,
-         Rate)
+         Rate) %>%
+  filter(., !is.na(Percentage), !is.na(Behavior), !(StratificationCategory == "Total"),
+         !(Stratification == "Data not reported")) 
 
 write.csv(JoinDF, "DataBases/JoinDF.csv")

@@ -41,6 +41,7 @@ shinyServer(function(input, output){
     })
     
     # show Cause of Death vs Rate graph in State
+    
     output$CauseDeath_plot <- renderPlot({ 
         
         JoinDF %>%
@@ -73,21 +74,58 @@ shinyServer(function(input, output){
             theme(legend.position = "bottom", legend.title = element_blank())
     })
     
+    
+    # show Cause of Death vs Rate graph in State
+    
+    output$Behavior_plot <-renderPlot({
+        JoinDF %>%
+            filter(., State == input$selectedState , Year == "2017", !is.na(Behavior))%>%
+            mutate(Behavior = fct_reorder(Behavior, desc(Percentage)))%>%
+            ggplot(aes( fill = Behavior)) +
+            geom_bar( aes( x = Behavior, y = Percentage), stat = "Identity", position = "dodge") +
+            theme_light()+
+            theme( legend.position = "none") +
+            scale_fill_manual(values = BehaviorCol) +
+            scale_x_discrete(guide = guide_axis(angle = 45))+
+            labs(x = "Behavior/Risk factor",
+                 y = "Population %")
+        
+    })
+    
+    
+    # show Behavior over time
+    
+    output$BehaviorOverTime_plot <- renderPlot({
+        
+        JoinDF %>% 
+            group_by(., Behavior , State, Year) %>%
+            filter(., State == input$selectedState, !is.na(Behavior)) %>%
+            summarise(., AvgPercent = mean(Percentage)) %>%
+            ggplot(aes(group = Behavior) )+
+            geom_line(aes( x = Year, y = AvgPercent, color = Behavior), size = 1 ) +
+            scale_color_manual(values = BehaviorCol)  +
+            labs(x = "Year",
+                 y = "Population %") +
+            theme_light() +
+            theme(legend.position = "bottom", legend.title = element_blank())
+    })
+    
+    
     # show Population % with the Behavior in Stratification
     
     output$BehaviorStrat_plot <- renderPlot({
     
         JoinDF %>%
-            filter(., State == input$selectedState2 , StratificationCategory == input$StratificationCategory, !is.na(Behavior)) %>%
-            group_by(., Stratification , Behavior) %>%
-            summarise(., AvgStratPerc = mean(Percentage), .groups = NULL) %>%
+            filter(., State == input$selectedState2 , StratificationCategory == input$StratificationCategory,
+                   Behavior == input$selectedBehavior2) %>%
             ggplot()+
-            geom_col(aes(x= Stratification, y = AvgStratPerc, fill = Behavior  ), position = "dodge") +
+            geom_boxplot(aes(x= Stratification, y = Percentage , fill = Behavior  )) +
             scale_fill_manual(values = BehaviorCol) +
             scale_x_discrete(guide = guide_axis(angle = 45)) +
-            labs(x = "Stratification",
+            labs(x = NULL,
                  y = "Population %") +
-            theme_light()     
+            theme_light()  +
+            theme(legend.position = "top", legend.title = element_blank())
     
         
     })
@@ -99,21 +137,4 @@ shinyServer(function(input, output){
             formatStyle(input$selected, background="skyblue", fontWeight='bold')
     })
     
-    # show statistics using infoBox
-    output$maxBox <- renderInfoBox({
-        max_value <- max(state_stat[,input$selected])
-        max_state <- 
-            state_stat$state.name[state_stat[,input$selected] == max_value]
-        infoBox(max_state, max_value, icon = icon("hand-o-up"))
-    })
-    output$minBox <- renderInfoBox({
-        min_value <- min(state_stat[,input$selected])
-        min_state <- 
-            state_stat$state.name[state_stat[,input$selected] == min_value]
-        infoBox(min_state, min_value, icon = icon("hand-o-down"))
-    })
-    output$avgBox <- renderInfoBox(
-        infoBox(paste("AVG.", input$selected),
-                mean(state_stat[,input$selected]), 
-                icon = icon("calculator"), fill = TRUE))
 })

@@ -8,10 +8,10 @@ shinyUI(dashboardPage(
         sidebarUserPanel( name = "MENU", img(src="healthy.jpg", height =45 )),
         sidebarMenu(
             menuItem("Home", tabName = "main", icon = icon("home")),
-            menuItem("Bevahior and Cause of Death", tabName = "bevahiorAndCause", icon = icon("heart")),
+            menuItem("Bevahior and Cause of Death", tabName = "bevahiorAndCause", icon = icon("file-medical-alt")),
             menuItem("Map", tabName = "map", icon = icon("map")),
-            menuItem("State", tabName = "state", icon = icon("map-pin")),
-            menuItem("Behavior", tabName = "behavior", icon = icon("running")),
+            menuItem("Stratification", tabName = "stratification", icon = icon("running")),
+            menuItem("State trends", tabName = "state", icon = icon("map-pin")),
             menuItem("Data", tabName = "data", icon = icon("database")),
             menuItem("Sources", tabName = "sources", icon = icon("book")),
             menuItem("About me", tabName = "aboutme", icon = icon("user-circle"))
@@ -40,44 +40,68 @@ shinyUI(dashboardPage(
                                   p("2. http://www.emro.who.int/about-who/public-health-functions/health-promotion-disease-prevention.html"), width =  12))
                     ),
             tabItem(tabName = "bevahiorAndCause",
-                    fluidRow(box(p("The relationship between the Cause of Death Rates and the incidence of particular behaviors/risk factors in the USA population is represented here by a correlation coefficient. A strong nevative linear relation will have
-                                    a correlation coeffitient close to -1, whereas a strong positive one will be close to 1."),
-                    plotOutput("CauseBehaCor_plot"),  width =  12))
+                    fluidRow(box(title = "Relationship between behavior and cause of death", solidHeader = TRUE, status = "primary",
+                                 p("The relationship between the incidence of particular behaviors/risk factors and leading causes of death in the USA population is represented here by a correlation coefficient."),
+                    plotOutput("CauseBehaCor_plot"),
+                    br(),
+                    box( p("A strong nevative linear relation will have a correlation coefficient close to -1, whereas a strong positive one will be close to 1."), background = "navy", width = 6),
+                    box( p("Correlation coefficients from -0.4 to 0.4 are so weak that conclusions should not be drawn from them."), background = "navy", width = 6), width =  12))
                     ),
             tabItem(tabName = "map",
-                    fluidRow(box( title= "Percent of adults who present the selected behavior/risk factor", status = "primary",
-                                  htmlOutput("map", width = "80%", height = "80%"), width =  12, background = "navy", solidHeader = TRUE, 
+                    fluidRow(box(selectizeInput(inputId = "selectedBehavior",
+                                                label = "Select Behavior/Risk factor",
+                                                choices = colnames(mapDF)[-1]), width =  12, status = "primary"),
+                             box( title= "Percent of adults who present the selected behavior/risk factor", solidHeader = TRUE, status = "primary",
+                                  htmlOutput("map", width = "70%", height = "70%"), width =  9, 
                                   p("The percent values shown here are an average of the data collected from 2011 to 2017.")),
-                             box(background = "navy", selectizeInput(inputId = "selectedBehavior",
-                                                                     label = "Select Behavior/Risk factor",
-                                                                     choices = colnames(mapDF)[-1]), width =  12))
+                             box( p("Once the behavior/risk factor of interest has been selected, we can focus on the geographical location where policy or prevention programs are to be implemented. This map provides insights into which States might need the resources the most.",
+                                    ), width = 3, background = "navy")
+                            )
                     ),
-            tabItem(tabName = "state",
-                    fluidRow(box(selectizeInput(inputId = "selectedState",
-                                                label = "Select State",
-                                                choices = unique(JoinDF$State)), width = 12)),
-                             box(plotOutput("CauseDeath_plot"), width = 6),
-                             box(plotOutput("DeathOverTime_plot"), width = 6),
-                             box(p("The death rates are age-adjusted per 100,000 people"), width = 12)
-                    ),
-            tabItem(tabName = "behavior",
+                        
+            tabItem(tabName = "stratification",
                     fluidRow(box(selectizeInput(inputId = "selectedState2",
                                                 label = "Select State",
-                                                choices = unique(JoinDF$State)), width = 6),
+                                                choices = unique(JoinDF$State, width= 3 )), status = "primary"),
+                             box(selectizeInput(inputId = "selectedBehavior2",
+                                                label = "Select Behavior/Risk factor",
+                                                choices = unique(JoinDF$Behavior, width= 3 )), status = "primary"),
                              box(selectizeInput(inputId = "StratificationCategory",
                                                 label = "Select Stratification Category",
-                                                choices = unique(JoinDF$StratificationCategory)), width = 6),
-                             box(plotOutput("BehaviorStrat_plot"), width = 12),
-                             box(p('The "Population %" represents the average percent, from 2011 to 2017, of adults presenting the specific behavior/risk factor'), width = 12))
+                                                choices = unique(JoinDF$StratificationCategory, width= 3 )), status = "primary"),
+                             box(p("To further focus the scope of the policies or programs to be implemented, here the population is gruped in different Stratification Categories."), background = "navy"),
+                             box(plotOutput("BehaviorStrat_plot"), width = 12, status = "primary"),
+                             box(p('The "Population %" represents the percent of adults presenting the specific behavior/risk factor'), width = 12)
+                             )
                     ),
+            
+            tabItem(tabName = "state",
+                    fluidRow( box(selectizeInput(inputId = "selectedState",
+                                                 label = "Select State",
+                                                 choices = unique(JoinDF$State)), width = 12, status = "primary"),
+                              box(p("This section aims to provide a more detailed insight into the trends of the Behavior and Causes of Death of interest in a specific State"), width = 12, background = "navy" ),
+                              tabsetPanel(tabPanel("Cause of Death", 
+                                                   box(plotOutput("CauseDeath_plot"), width = 6),
+                                                   box(plotOutput("DeathOverTime_plot"), width = 6), status = "primary"),
+                                          tabPanel("Behaviors",
+                                                   box(plotOutput("Behavior_plot"), width = 6),
+                                                   box(plotOutput("BehaviorOverTime_plot"), width = 6), status = "primary"
+                                          )
+                              )
+                    )
+            ),
     
             tabItem(tabName = "data",
                     fluidRow(box(DT::dataTableOutput("table"), width = 12))),
         
             tabItem(tabName = "sources",
                     fluidRow(box(p(h4("Centers for Disease Control and Prevention")),
+                             br(),
+                             p("CDC/NCHS, National Vital Statistics System, mortality data"),
                              p("https://chronicdata.cdc.gov/Nutrition-Physical-Activity-and-Obesity/Nutrition-Physical-Activity-and-Obesity-Behavioral/hn4x-zwk7"),
-                             p("https://data.cdc.gov/NCHS/NCHS-Leading-Causes-of-Death-United-States/bi63-dtpu"), width = 12))
+                             br(),
+                             p("Division of Nutrition, Physical Activity, and Obesity"),
+                             p("https://data.cdc.gov/NCHS/NCHS-Leading-Causes-of-Death-United-States/bi63-dtpu"), width = 12), status = "primary")
                     ),
             tabItem(tabName = "aboutme",
                     fluidRow(box(img(src="GHM.jpeg", height="20%", width="20%"),
@@ -87,7 +111,7 @@ shinyUI(dashboardPage(
                                  br(),
                                  p("LinkedIn: https://www.linkedin.com/in/gabriela-huelgas-morales-0896b8b3/?locale=en_US"),
                                  br(),
-                                 p("GoogleScholar : https://scholar.google.com/citations?user=SG6xGIYAAAAJ&hl=en "), width = 12))
+                                 p("GoogleScholar : https://scholar.google.com/citations?user=SG6xGIYAAAAJ&hl=en "), width = 12), status = "primary")
             )
                     )
             ),
