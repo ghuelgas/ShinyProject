@@ -18,3 +18,8 @@ BehaviorCol = c("Light physical activity" = "lightblue4", "Low fruit consumption
 
 CofDeathCol = c("Alzheimer's disease" = "skyblue4", "Diabetes" = "paleturquoise" , "Heart disease" = "bisque2", "Kidney disease" = "gray20",
                 "Stroke" = "peru")
+
+mapDF = JoinDF %>% group_by (., State, Behavior) %>% 
+  filter(., !is.na(Behavior) ) %>%
+  summarize(., PopulationPercentage = mean(Percentage)) %>%
+  pivot_wider(., names_from = Behavior, values_from = PopulationPercentage)

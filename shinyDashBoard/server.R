@@ -1,10 +1,4 @@
 
-mapDF = JoinDF %>% group_by (., State, Behavior) %>% 
-    filter(., !is.na(Behavior) ) %>%
-    summarize(., PopulationPercentage = mean(Percentage)) %>%
-    pivot_wider(., names_from = Behavior, values_from = PopulationPercentage)
-
-mapDF
 
 shinyServer(function(input, output){
    
@@ -20,7 +14,7 @@ shinyServer(function(input, output){
         )
     })
     
-    # show correlation graph in MAP
+    # show correlation graph in Main
     output$CauseBehaCor_plot <- renderPlot({ 
         
         JoinDF %>%
@@ -89,7 +83,7 @@ shinyServer(function(input, output){
             summarise(., AvgStratPerc = mean(Percentage), .groups = NULL) %>%
             ggplot()+
             geom_col(aes(x= Stratification, y = AvgStratPerc, fill = Behavior  ), position = "dodge") +
-            scale_fill_manual(values = QsCol) +
+            scale_fill_manual(values = BehaviorCol) +
             scale_x_discrete(guide = guide_axis(angle = 45)) +
             labs(x = "Stratification",
                  y = "Population %") +
