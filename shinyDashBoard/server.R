@@ -119,7 +119,8 @@ shinyServer(function(input, output){
             filter(., State == input$selectedState2 , StratificationCategory == input$StratificationCategory,
                    Behavior == input$selectedBehavior2) %>%
             ggplot()+
-            geom_boxplot(aes(x= Stratification, y = Percentage , fill = Behavior  )) +
+            geom_point(aes(x= Stratification, y = Percentage)) +
+            geom_boxplot(aes(x= Stratification, y = Percentage , fill = Behavior), alpha = 0.5) +
             scale_fill_manual(values = BehaviorCol) +
             scale_x_discrete(guide = guide_axis(angle = 45)) +
             labs(x = NULL,
