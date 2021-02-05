@@ -1,0 +1,12 @@
+name: HealthAndBehavior
+title: HealthAndBehavior
+username:
+account: ghuelgas
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3579635
+bundleId: 4178630
+url: https://ghuelgas.shinyapps.io/HealthAndBehavior/
+when: 1612411022.30777
+asMultiple: FALSE
+asStatic: FALSE
